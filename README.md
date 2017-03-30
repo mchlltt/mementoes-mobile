@@ -1,5 +1,7 @@
 # Mementoes (mobile)
-A React Native sister application to the Mementoes web application ([GitHub](https://github.com/mchlltt/mementoes), [Heroku](https://mementoes.herokuapp.com/)). Currently supports Android phones.
+Inspired by the idea of a [Happiness Jar](https://www.elizabethgilbert.com/lets-talk-about-those-happiness-jars-shall-we-dear-lovelies-about-a-y/), Mementoes asks you to make a note of one thing that made you happy each day. This exercise allows you to connect with the good things in your life as they happen and to reflect back upon them over time.
+
+This repository hosts a React Native sister application to the Mementoes web application ([GitHub](https://github.com/mchlltt/mementoes), [Heroku](https://mementoes.herokuapp.com/)). Currently supports Android phones.
 
 ## Demo
 ![App demo GIF](https://github.com/mchlltt/mementoes-mobile/raw/master/demo_gif.gif)
