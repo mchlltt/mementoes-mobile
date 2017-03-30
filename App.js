@@ -6,10 +6,13 @@ import {
     AsyncStorage,
     Button,
     Image,
+    Linking,
     ScrollView,
     StyleSheet,
+    Switch,
     Text,
     TextInput,
+    TimePickerAndroid,
     TouchableHighlight,
     TouchableNativeFeedback,
     View
@@ -18,15 +21,24 @@ import * as simpleAuthProviders from 'react-native-simple-auth';
 import secrets from './secrets';
 import Calendar from 'react-native-calendar';
 import moment from 'moment';
-import {StackNavigator, NavigationActions} from 'react-navigation';
+import {StackNavigator} from 'react-navigation';
+import SettingsList from 'react-native-settings-list';
+import PushNotification from 'react-native-push-notification';
+// import TagInput from 'react-native-tag-input';
 
-const backAction = NavigationActions.back();
+PushNotification.configure({
+    onNotification: function (notification) {
+        console.log('NOTIFICATION:', notification);
+    },
+    popInitialNotification: true,
+    requestPermissions: true
+});
 
 class HomeScreen extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {loading: true};
+        this.state = {loading: true, token: true};
     }
 
     componentDidMount() {
@@ -116,12 +128,15 @@ class CalendarScreen extends Component {
             right: (
                 <Button
                     title='Log Out'
-                    onPress={() => AsyncStorage.removeItem('id_token').then(() => {navigate('Home')})}
+                    onPress={() => AsyncStorage.multiRemove(['id_token', 'hour', 'minute', 'enabled']).then(() => {
+                        navigate('Home')
+                    })}
                 />
             ),
-            style: {paddingRight: 5}
+            style: {paddingRight: 15}
         })
     };
+
 
     componentWillMount() {
         const {params} = this.props.navigation.state;
@@ -152,6 +167,12 @@ class CalendarScreen extends Component {
     onPress(date, navigate, params) {
         navigate('Day', {
             date: date.split('T')[0],
+            token: params.token
+        });
+    }
+
+    goToSettings(navigate, params) {
+        navigate('Settings', {
             token: params.token
         });
     }
@@ -189,15 +210,22 @@ class CalendarScreen extends Component {
                     nextButtonText={'Next'}
                     onDateSelect={(date) => this.onPress(date, navigate, params)}
                 />
-                <Button
-                    title='Refresh'
-                    onPress={this.fetchData.bind(this, params)}
-                    color='purple'
-                />
                 <ActivityIndicator
                     animating={this.state.loading}
                     style={[styles.loading]}
                     size='large'/>
+                <Button
+                    title='Refresh'
+                    onPress={this.fetchData.bind(this, params)}
+                    color='purple'
+                    style={{alignSelf: 'flex-end'}}
+                />
+                <Button
+                    title='Settings'
+                    onPress={() => this.goToSettings(navigate, params)}
+                    color='red'
+                />
+
             </View>
         )
     }
@@ -214,12 +242,12 @@ class DayScreen extends Component {
     }
 
     static navigationOptions = {
-        title: ({ state }) => `Entries on ${moment(state.params.date).format('MMMM Do[,] YYYY')}`
+        title: ({state}) => `Entries on ${moment(state.params.date).format('MMMM Do[,] YYYY')}`
     };
 
     handleEntrySubmit() {
         this.postData(this.state.entry);
-        this.setState({ entry: '' });
+        this.setState({entry: ''});
     }
 
     componentWillMount() {
@@ -280,7 +308,7 @@ class DayScreen extends Component {
     render() {
         const {params} = this.props.navigation.state;
 
-        return(
+        return (
             <View style={styles.content}>
                 <ScrollView>
                     {
@@ -322,13 +350,19 @@ class EntryScreen extends Component {
         this.handleEntryUpdate = this.handleEntryUpdate.bind(this);
     }
 
+    state = {
+        tags: [],
+    };
+
     componentWillMount() {
         const {params} = this.props.navigation.state;
-        this.setState({entry: params.entryText});
+        this.setState({
+            entry: params.entryText
+        });
     }
 
     static navigationOptions = {
-        title: ({ state }) => `${moment(state.params.date).format('MMMM Do[,] YYYY')}`,
+        title: ({state}) => `${moment(state.params.date).format('MMMM Do[,] YYYY')}`,
     };
 
     deleteData() {
@@ -344,7 +378,7 @@ class EntryScreen extends Component {
     putData() {
         const {params} = this.props.navigation.state;
 
-        fetch('http://mementoes.herokuapp.com/api/entries/',
+        fetch('http://mementoes.herokuapp.com/api/entries/tagless',
             {
                 method: 'PUT',
                 headers: {
@@ -378,10 +412,14 @@ class EntryScreen extends Component {
         navigate.navigate('Day', {date: navigate.state.params.date, token: navigate.state.params.token});
     }
 
+    onChangeTags = (tags) => {
+        this.setState({ tags });
+    };
+
     render() {
         const navigate = this.props.navigation;
 
-        return(
+        return (
             <View style={styles.content}>
                 <ScrollView>
                     <View style={styles.entryBox}>
@@ -395,6 +433,19 @@ class EntryScreen extends Component {
                                 this.setState({height: event.nativeEvent.contentSize.height});
                             }}
                         />
+                        {/*<View style={{ flex: 1, margin: 10}}>*/}
+                            {/*<View style={{flexDirection: 'row', alignItems: 'center', width: '100%'}}>*/}
+                                {/*<Text>Tags:</Text>*/}
+                                {/*<TagInput*/}
+                                    {/*style={{height:60}}*/}
+                                    {/*value={this.state.tags}*/}
+                                    {/*onChange={this.onChangeTags}*/}
+                                    {/*tagColor="blue"*/}
+                                    {/*tagTextColor="white"*/}
+                                    {/*numberOfLines={3}*/}
+                                {/*/>*/}
+                            {/*</View>*/}
+                        {/*</View>*/}
                         <View style={styles.buttonBar}>
                             <Button
                                 title='Save'
@@ -417,15 +468,247 @@ class EntryScreen extends Component {
 
 }
 
-const Mementoes = StackNavigator({
+class SettingsScreen extends Component {
+    constructor(props) {
+        super(props);
+        state = {}
+    }
+
+    static navigationOptions = {
+        title: 'Settings'
+    };
+
+    navigateToSetting(page, navigate, params) {
+        AsyncStorage.multiGet(['enabled', 'hour', 'minute']).then((value) => {
+            navigate(page, {
+                token: params.token,
+                notificationsSettings: value
+            });
+        });
+
+    }
+
+    render() {
+        const {navigate} = this.props.navigation;
+        const {params} = this.props.navigation.state;
+
+        return (
+            <View style={styles.content}>
+                <SettingsList borderColor='#d6d5d9' defaultItemSize={50}>
+                    <SettingsList.Item
+                        hasNavArrow={false}
+                        title='Notifications & Alerts'
+                        titleStyle={{color: '#009688', marginBottom: 10, fontWeight: '500'}}
+                        itemWidth={50}
+                        borderHide={'Both'}
+                    />
+                    <SettingsList.Item
+                        hasNavArrow={true}
+                        itemWidth={70}
+                        titleStyle={{color: 'black', fontSize: 16}}
+                        title='Notifications'
+                        onPress={() => this.navigateToSetting('Notifications', navigate, params)}
+                    />
+                    <SettingsList.Header headerStyle={{marginTop: -5}}/>
+                    <SettingsList.Item
+                        hasNavArrow={false}
+                        title='Account'
+                        titleStyle={{color: '#009688', marginBottom: 10, fontWeight: 'bold'}}
+                        itemWidth={70}
+                        borderHide={'Both'}
+                    />
+                    <SettingsList.Item
+                        title='Export Data'
+                        itemWidth={70}
+                        titleStyle={{color: 'black', fontSize: 16}}
+                        hasNavArrow={true}
+                        onPress={() => this.navigateToSetting('ExportDelete', navigate, params)}
+                    />
+                    <SettingsList.Item
+                        title='Delete Account'
+                        itemWidth={70}
+                        titleStyle={{color: 'black', fontSize: 16}}
+                        hasNavArrow={true}
+                        onPress={() => this.navigateToSetting('ExportDelete', navigate, params)}
+                    />
+                </SettingsList>
+            </View>
+        );
+    }
+}
+
+class NotificationsScreen extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            switchValue: false,
+            presetHour: 17,
+            presetMinute: 0,
+            presetText: '17:00'
+        };
+    }
+
+    static navigationOptions = {
+        title: 'Notifications'
+    };
+
+    componentWillMount() {
+        function formatTime(hour, minute) {
+            return hour + ':' + (minute < 10 ? '0' + minute : minute);
+        }
+
+        const {params} = this.props.navigation.state;
+        let settings = params.notificationsSettings;
+
+        // If the hour value isn't null,
+        if (settings[1][1]) {
+            // Enabled is whether the first value is the string 'true'.
+            let enabled = 'true' === settings[0][1];
+            let hour = parseInt(settings[1][1], 10);
+            let minute = parseInt(settings[2][1], 10);
+
+            this.setState({
+                switchValue: enabled,
+                presetHour: hour,
+                presetMinute: minute,
+                presetText: formatTime(hour, minute)
+            });
+        }
+    }
+
+    cancelNotifications() {
+        PushNotification.cancelAllLocalNotifications();
+    }
+
+    scheduleNotification() {
+        // Get rid of any old notifications.
+        this.cancelNotifications();
+
+        // Compare right now to the time specified for notification.
+        let now = moment();
+        let notification = moment().hours(this.state.presetHour).minutes(this.state.presetMinute).seconds(0);
+
+        // If that time has already passed today, add another day before scheduling the first notification.
+        if (now.isSameOrAfter(notification)) {
+            notification.add(1, 'days');
+        }
+
+        // Set up the new notifications
+        PushNotification.localNotificationSchedule({
+            message: 'What made you happy today?',
+            vibrate: true,
+            vibration: 300,
+            smallIcon: 'purple',
+            ongoing: false,
+            playSound: false,
+            repeatType: 'day',
+            // Convert moment back to Date object.
+            date: notification.toDate()
+        });
+    }
+
+    showPicker = async (stateKey, options) => {
+        const {action, minute, hour} = await TimePickerAndroid.open(options);
+        let newState = {};
+        if (action === TimePickerAndroid.timeSetAction) {
+            newState[stateKey + 'Text'] = hour + ':' + (minute < 10 ? '0' + minute : minute);
+            newState[stateKey + 'Hour'] = hour;
+            newState[stateKey + 'Minute'] = minute;
+            this.setState(newState);
+
+            this.handleValueChange();
+        }
+    }
+
+    handleValueChange(){
+        // Write the value and hour/minute to AsyncStorage.
+        AsyncStorage.multiSet([['enabled', this.state.switchValue.toString()], ['hour', this.state.presetHour.toString()], ['minute', this.state.presetMinute.toString()]])
+            .catch((err) => console.log(err));
+
+        // If the switch is on, schedule notifications.
+        if (this.state.switchValue) {
+            this.scheduleNotification();
+        // Otherwise, cancel them.
+        } else {
+            this.cancelNotifications();
+        }
+    }
+
+    render () {
+        return (
+            <View style={styles.content}>
+                <View style={styles.entryBox}>
+                    <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+                        <Text style={styles.entryText}>Enable Reminder Notifications</Text>
+                        <Switch
+                            onValueChange={(value) => {
+                                this.setState({switchValue: value});
+                                this.handleValueChange();
+                            }}
+                            style={{marginBottom: 10}}
+                            value={this.state.switchValue}/>
+                    </View>
+                    {this.state.switchValue &&
+                    <View>
+                        <View>
+                            <Text style={styles.entryText}>Pick a daily notification time.</Text>
+                        </View>
+                        <Button
+                            title={this.state.presetText}
+                            onPress={this.showPicker.bind(this, 'preset', {
+                                hour: this.state.presetHour,
+                                minute: this.state.presetMinute,
+                            })}/>
+                    </View>
+                    }
+                </View>
+            </View>
+        )
+    }
+}
+
+class ExportDeleteScreen extends Component {
+    constructor(props) {
+        super(props);
+    }
+
+    static navigationOptions = {
+        title: 'Export Data'
+    };
+
+    openURL() {
+        Linking.openURL('http://mementoes.herokuapp.com/');
+    }
+
+    render () {
+        return (
+            <View style={styles.content}>
+                <View style={styles.entryBox}>
+                    <Text style={styles.exportText}>Data Export and Account Deletion is not yet available on Android. Please log in on</Text>
+                    <Text style={styles.exportText}>mementoes.herokuapp.com</Text>
+                    <Text style={styles.exportText}>to export your data or delete your account.</Text>
+                    <Button title="Launch Website" onPress={this.openURL} color="#5cb85c"/>
+                </View>
+
+            </View>
+        )
+    }
+}
+
+const Mementoes = StackNavigator(
+    {
         Home: {screen: HomeScreen},
         Calendar: {screen: CalendarScreen},
         Day: {screen: DayScreen},
-        Entry: {screen: EntryScreen}
+        Entry: {screen: EntryScreen},
+        Settings: {screen: SettingsScreen},
+        Notifications: {screen: NotificationsScreen},
+        ExportDelete: {screen: ExportDeleteScreen}
     },
     {
         headerMode: 'screen'
-    });
+    }
+);
 
 const styles = StyleSheet.create({
     container: {
@@ -463,8 +746,7 @@ const styles = StyleSheet.create({
     },
     image: {
         marginTop: 20,
-        flex: 2,
-        alignSelf: 'center'
+        flex: 2
     },
     entryBox: {
         backgroundColor: 'white',
@@ -481,6 +763,11 @@ const styles = StyleSheet.create({
     entryText: {
         width: '90%',
         fontSize: 24,
+    },
+    exportText: {
+        width: '90%',
+        fontSize: 18,
+        textAlign: 'center'
     },
     input: {
         width: '90%',
