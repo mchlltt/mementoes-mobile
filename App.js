@@ -746,7 +746,8 @@ const styles = StyleSheet.create({
     },
     image: {
         marginTop: 20,
-        flex: 2
+        flex: 2,
+        alignSelf: 'center'
     },
     entryBox: {
         backgroundColor: 'white',
