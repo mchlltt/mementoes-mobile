@@ -33,7 +33,7 @@ _'Export Data' and 'Delete Account' in Settings direct the user to launch the we
 - MomentJS
 - WebStorm and Android Studio
 
-## Authors
+## Author
 - Mich Elliott - [mchlltt](https://github.com/mchlltt)
 
 ## License
@@ -42,4 +42,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) f
 ## Acknowledgements
 The author of this project would like to thank Northwestern University Coding Boot Camp for direction and support in creating this product, as well as the vibrant community of React Native users for sharing their work and wisdom.
 
-Additionally, the jar used in the application logo was used with permission from <a href="http://www.freepik.com/free-photos-vectors/background">Freepik</a>.
+Additionally, the jar in the application logo was used with permission from <a href="http://www.freepik.com/free-photos-vectors/background">Freepik</a>.
