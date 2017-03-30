@@ -14,7 +14,6 @@
     "react-native-push-notification": "^2.2.1",
     "react-native-settings-list": "^1.4.0",
     "react-native-simple-auth": "^2.0.1",
-    "react-native-system-notification": "^0.2.1",
     "react-navigation": "^1.0.0-beta.7"
   },
   "devDependencies": {
