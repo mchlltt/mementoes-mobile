@@ -9,9 +9,11 @@ import {
 import moment from 'moment';
 import SettingsList from 'react-native-settings-list';
 import PushNotification from 'react-native-push-notification';
+import * as Keychain from 'react-native-keychain';
 
 PushNotification.configure({
-    onNotification: function (notification) {},
+    onNotification: function (notification) {
+    },
     popInitialNotification: true,
     requestPermissions: true
 });
@@ -107,7 +109,7 @@ export default class SettingsScreen extends Component {
         }
     }
 
-    handleValueChange(value){
+    handleValueChange(value) {
         // Write the value and hour/minute to AsyncStorage.
         AsyncStorage.multiSet([['enabled', value.toString()], ['hour', this.state.presetHour.toString()], ['minute', this.state.presetMinute.toString()]])
             .catch((err) => console.log(err));
@@ -123,7 +125,12 @@ export default class SettingsScreen extends Component {
 
     logOut(navigate) {
         PushNotification.cancelAllLocalNotifications();
-        AsyncStorage.multiRemove(['id_token', 'hour', 'minute', 'enabled']).then(() => {navigate('Home')})
+        Keychain.resetGenericPassword().then(() => {
+            AsyncStorage.multiRemove(['hour', 'minute', 'enabled']).then(() => {
+                navigate('Home')
+            })
+        })
+
     }
 
     render() {

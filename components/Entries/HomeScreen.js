@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import {
     ActivityIndicator,
     Alert,
-    AsyncStorage,
     Image,
     StyleSheet,
     Text,
@@ -10,6 +9,7 @@ import {
     View
 } from 'react-native';
 import * as simpleAuthProviders from 'react-native-simple-auth';
+import * as Keychain from 'react-native-keychain';
 import secrets from '../../secrets';
 
 export default class HomeScreen extends Component {
@@ -25,16 +25,25 @@ export default class HomeScreen extends Component {
     }
 
     getToken(navigate) {
-        AsyncStorage.getItem('id_token').then((token) => {
-            if (token) {
-                navigate('Calendar', {token});
-            } else {
+        Keychain
+            .getGenericPassword()
+            .then((credentials) => {
+                if (credentials) {
+                    navigate('Calendar', {token: credentials.username});
+                } else {
+                    this.setState({
+                        loading: false,
+                        showButton: true
+                    });
+                }
+            })
+            .catch((err) => {
                 this.setState({
+                    err: err,
                     loading: false,
                     showButton: true
                 });
-            }
-        });
+            });
     }
 
     static navigationOptions = {
@@ -52,8 +61,11 @@ export default class HomeScreen extends Component {
                 _this.setState({
                     showButton: false,
                 });
-                AsyncStorage.setItem('id_token', info.user.id);
-                navigate('Calendar', {token: info.user.id});
+                Keychain
+                    .setGenericPassword(info.user.id, info.user.id)
+                    .then(function() {
+                        navigate('Calendar', {token: info.user.id});
+                    });
             })
             .catch((error) => {
                 _this.setState({
@@ -74,19 +86,19 @@ export default class HomeScreen extends Component {
             <View style={styles.content}>
                 <Image source={require('../../logo.png')} style={styles.image} resizeMode={Image.resizeMode.center}/>
                 <View style={{height: '30%'}}>
-                {
-                    this.state.showButton &&
-                    <TouchableHighlight
-                        style={styles.button}
-                        onPress={this.onPress.bind(this, 'google', secrets['google'], navigate)}>
-                        <Text style={[styles.buttonText]}>Sign Up/In with Google</Text>
-                    </TouchableHighlight>
+                    {
+                        this.state.showButton &&
+                        <TouchableHighlight
+                            style={styles.button}
+                            onPress={this.onPress.bind(this, 'google', secrets['google'], navigate)}>
+                            <Text style={[styles.buttonText]}>Sign Up/In with Google</Text>
+                        </TouchableHighlight>
 
-                }
-                <ActivityIndicator
-                    animating={this.state.loading}
-                    style={[styles.loading]}
-                    size='large'/>
+                    }
+                    <ActivityIndicator
+                        animating={this.state.loading}
+                        style={[styles.loading]}
+                        size='large'/>
                 </View>
             </View>
         );
