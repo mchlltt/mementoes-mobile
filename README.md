@@ -3,11 +3,14 @@ Inspired by the idea of a [Happiness Jar](https://www.elizabethgilbert.com/lets-
 
 This repository hosts a React Native sister application to the Mementoes web application ([GitHub](https://github.com/mchlltt/mementoes), [Heroku](https://mementoes.herokuapp.com/)). Currently supports Android phones.
 
-## Demo
-![App demo GIF](https://github.com/mchlltt/mementoes-mobile/raw/master/demo_gif.gif)
+## GIF Demo
+<img src="https://github.com/mchlltt/mementoes-mobile/raw/master/demo_gif.gif" height="600" alt="App demo GIF">
+
+## Live Demo
+You can also demo the application live on Appetize.io [here](https://appetize.io/app/nnbc5640y4nnxex7nj8b5ejecg).
 
 ## Features
-The demo above walks through the main features of the application.
+The GIF demo above walks through the main features of the application.
 - Authentication with Google OAuth 2.0.
 - Synchronized data across web app and mobile app.
 - View, create, update, or delete entries.
