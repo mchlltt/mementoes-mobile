@@ -13,7 +13,6 @@ export default class EntryScreen extends Component {
     constructor(props) {
         super(props);
         this.handleEditSubmit = this.handleEditSubmit.bind(this);
-        this.handleEntryUpdate = this.handleEntryUpdate.bind(this);
     }
 
     componentWillMount() {
@@ -62,12 +61,6 @@ export default class EntryScreen extends Component {
         }
     }
 
-    handleEntryUpdate(event) {
-        this.setState({
-            entry: event.nativeEvent.text
-        });
-    }
-
     handleEditSubmit(navigate) {
         this.putData();
         
@@ -112,7 +105,7 @@ export default class EntryScreen extends Component {
                         <TextInput
                             multiline={true}
                             style={[styles.multilineInput, {height: Math.max(35, this.state.height)}]}
-                            onChange={this.handleEntryUpdate}
+                            onChangeText={(text) => this.setState({entry: text})}
                             value={this.state.entry}
                             placeholder='Memento text'
                             onSubmitEditing={this.handleEditSubmit.bind(this, navigate)}
@@ -145,43 +138,11 @@ export default class EntryScreen extends Component {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#3ca2e0'
-    },
     content: {
         flex: 1,
         backgroundColor: '#3ca2e0',
         paddingTop: 10,
         justifyContent: 'flex-start'
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 18,
-        alignSelf: 'center'
-    },
-    button: {
-        height: 36,
-        flexDirection: 'row',
-        borderRadius: 30,
-        marginTop: 10,
-        marginBottom: 10,
-        justifyContent: 'center',
-        alignSelf: 'center',
-        borderWidth: 2,
-        borderColor: 'white',
-        width: '80%'
-    },
-    buttonBar: {
-        flexDirection: 'row'
-    },
-    loading: {
-        flex: 1
-    },
-    image: {
-        marginTop: 20,
-        flex: 2,
-        alignSelf: 'center'
     },
     entryBox: {
         backgroundColor: 'white',
@@ -194,30 +155,6 @@ const styles = StyleSheet.create({
         width: '90%',
         alignSelf: 'center',
         marginBottom: 20
-    },
-    entryText: {
-        width: '90%',
-        fontSize: 24,
-    },
-    exportText: {
-        width: '90%',
-        fontSize: 20,
-        textAlign: 'center',
-        marginBottom: 10
-    },
-    input: {
-        width: '90%',
-        color: 'gray',
-        height: 60,
-        paddingLeft: 4,
-        fontSize: 24,
-        shadowColor: '#000000',
-        shadowOpacity: 0.8,
-        shadowRadius: 2,
-        shadowOffset: {
-            height: 1,
-            width: 0
-        }
     },
     multilineInput: {
         width: '90%',

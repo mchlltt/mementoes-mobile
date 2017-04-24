@@ -135,9 +135,6 @@ const styles = StyleSheet.create({
         width: '70%',
         maxWidth: 220
     },
-    buttonBar: {
-        flexDirection: 'row'
-    },
     loading: {
         flex: 1
     },
@@ -146,54 +143,5 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         flex: 2,
         alignSelf: 'center'
-    },
-    entryBox: {
-        backgroundColor: 'white',
-        minHeight: 100,
-        flex: 1,
-        padding: 5,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 12,
-        width: '90%',
-        alignSelf: 'center',
-        marginBottom: 20
-    },
-    entryText: {
-        width: '90%',
-        fontSize: 24,
-    },
-    exportText: {
-        width: '90%',
-        fontSize: 20,
-        textAlign: 'center',
-        marginBottom: 10
-    },
-    input: {
-        width: '90%',
-        color: 'gray',
-        height: 60,
-        paddingLeft: 4,
-        fontSize: 24,
-        shadowColor: '#000000',
-        shadowOpacity: 0.8,
-        shadowRadius: 2,
-        shadowOffset: {
-            height: 1,
-            width: 0
-        }
-    },
-    multilineInput: {
-        width: '90%',
-        color: 'gray',
-        paddingLeft: 4,
-        fontSize: 24,
-        shadowColor: '#000000',
-        shadowOpacity: 0.8,
-        shadowRadius: 2,
-        shadowOffset: {
-            height: 1,
-            width: 0
-        }
     }
 });

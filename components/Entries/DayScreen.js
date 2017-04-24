@@ -68,7 +68,7 @@ export default class DayScreen extends Component {
         fetch('http://mementoes.herokuapp.com/api/entries/' + params.token)
             .then(response => response.json())
             .then((responseData) => {
-                var entries = [];
+                let entries = [];
                 responseData.forEach(function (response) {
                     if (moment(response.date).format().split('T')[0] === params.date) {
                         entries.push({text: response.text, date: response.date.split('T')[0], id: response.id});
@@ -83,8 +83,6 @@ export default class DayScreen extends Component {
     }
 
     render() {
-        const {params} = this.props.navigation.state;
-
         return (
             <View style={styles.content}>
                 <ScrollView>
@@ -105,11 +103,15 @@ export default class DayScreen extends Component {
 
                     <View style={styles.entryBox}>
                         <TextInput
-                            style={styles.input}
-                            placeholder='New Memento'
-                            onSubmitEditing={this.handleEntrySubmit}
+                            multiline={true}
+                            style={[styles.multilineInput, {height: Math.max(35, this.state.height)}]}
                             onChangeText={(text) => this.setState({entry: text})}
                             value={this.state.entry}
+                            placeholder='New Memento'
+                            onSubmitEditing={this.handleEntrySubmit}
+                            onContentSizeChange={(event) => {
+                                this.setState({height: event.nativeEvent.contentSize.height});
+                            }}
                         />
                     </View>
 
@@ -121,43 +123,11 @@ export default class DayScreen extends Component {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#3ca2e0'
-    },
     content: {
         flex: 1,
         backgroundColor: '#3ca2e0',
         paddingTop: 10,
         justifyContent: 'flex-start'
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 18,
-        alignSelf: 'center'
-    },
-    button: {
-        height: 36,
-        flexDirection: 'row',
-        borderRadius: 30,
-        marginTop: 10,
-        marginBottom: 10,
-        justifyContent: 'center',
-        alignSelf: 'center',
-        borderWidth: 2,
-        borderColor: 'white',
-        width: '80%'
-    },
-    buttonBar: {
-        flexDirection: 'row'
-    },
-    loading: {
-        flex: 1
-    },
-    image: {
-        marginTop: 20,
-        flex: 2,
-        alignSelf: 'center'
     },
     entryBox: {
         backgroundColor: 'white',
@@ -174,26 +144,6 @@ const styles = StyleSheet.create({
     entryText: {
         width: '90%',
         fontSize: 24,
-    },
-    exportText: {
-        width: '90%',
-        fontSize: 20,
-        textAlign: 'center',
-        marginBottom: 10
-    },
-    input: {
-        width: '90%',
-        color: 'gray',
-        height: 60,
-        paddingLeft: 4,
-        fontSize: 24,
-        shadowColor: '#000000',
-        shadowOpacity: 0.8,
-        shadowRadius: 2,
-        shadowOffset: {
-            height: 1,
-            width: 0
-        }
     },
     multilineInput: {
         width: '90%',
