@@ -24,8 +24,10 @@ export default class DayScreen extends Component {
     };
 
     handleEntrySubmit() {
-        this.postData(this.state.entry);
-        this.setState({entry: ''});
+        if (this.state.entry.length > 0) {
+            this.postData(this.state.entry);
+            this.setState({entry: ''});
+        }
     }
 
     componentWillMount() {
