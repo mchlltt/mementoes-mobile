@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {
+    Button,
     ScrollView,
     StyleSheet,
     Text,
@@ -100,7 +101,6 @@ export default class DayScreen extends Component {
                             );
                         })
                     }
-
                     <View style={styles.entryBox}>
                         <TextInput
                             multiline={true}
@@ -113,8 +113,21 @@ export default class DayScreen extends Component {
                                 this.setState({height: event.nativeEvent.contentSize.height});
                             }}
                         />
+                        <View style={{width: 140, justifyContent: 'space-between', flexDirection: 'row'}}>
+                            <Button
+                                title='Submit'
+                                color='#5cb85c'
+                                onPress={this.handleEntrySubmit}
+                                accessibilityLabel='Submit your Memento.'
+                            />
+                            <Button
+                                title='Reset'
+                                color='#d9534f'
+                                onPress={() => this.setState({entry: ''})}
+                                accessibilityLabel='Reset the contents of the input box.'
+                            />
+                        </View>
                     </View>
-
                 </ScrollView>
             </View>
         )
